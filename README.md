@@ -8,7 +8,9 @@ A collection of baseball analytics projects using Python, Statcast data, and Tab
 
 A Python tool that scores every start of a pitcher's season against his own recent performance baseline (velocity, spin rate, release point, and workload) to flag rising injury risk before it becomes a medical event. Validated against Spencer Strider's real 2024 UCL injury, the index flagged elevated risk in his final two starts before he went down.
 
-Tools: Python, pybaseball, Statcast, pandas, matplotlib, Google Colab
+Tools: Python, pybaseball, Statcast, Google Colab
+
+[View Notebook](pitcher_fatigue_risk_index_Spencer_Strider.ipynb)
 
 ### 2. AL East Lineup xwOBA Analyzer
 A Python tool that pulls 2024 Statcast data from Baseball Savant and displays each AL East team's xwOBA splits against right-handed and left-handed pitching. Built using pybaseball in Google Colab.
