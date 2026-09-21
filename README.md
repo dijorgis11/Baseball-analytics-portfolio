@@ -10,7 +10,8 @@ A platoon-split and strike-zone scouting view — how a hitter performs against 
 
 Tools: Python, pybaseball, Statcast, Google Colab
 
-https://dijorgis11.github.io/Baseball-analytics-portfolio/matchup_attack_chart.html
+[![Uploading image.png…]()](https://dijorgis11.github.io/Baseball-analytics-portfolio/matchup_attack_chart.html)
+
 
 ### 2. Pitcher Fatigue Risk Index - Spencer Strider
 
