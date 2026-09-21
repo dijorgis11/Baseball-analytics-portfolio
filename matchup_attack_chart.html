@@ -1,0 +1,1074 @@
+<title>Matchup Attack Chart</title>
+<style>
+  :root{
+    --bg:#0F1B33;
+    --surface:#16234A;
+    --surface-2:#1B2E52;
+    --text:#EAF0FF;
+    --text-dim:#9FB0D6;
+    --text-muted:#7C8CB3;
+    --border:#263C74;
+    --accent:#2FD673;
+    --brand:#CE1141;
+    --brand-ink:#FFFFFF;
+    --accent-ink:#0B1A12;
+    --hot:#2FD673;
+    --hot-soft:#12321F;
+    --cold:#1E5FD9;
+    --cold-soft:#142A4D;
+    --neutral-mid:#1A2A44;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F1B33;
+      --surface:#16234A;
+      --surface-2:#1B2E52;
+      --text:#EAF0FF;
+      --text-dim:#9FB0D6;
+      --text-muted:#7C8CB3;
+      --border:#263C74;
+      --accent:#2FD673;
+    --brand:#CE1141;
+    --brand-ink:#FFFFFF;
+      --accent-ink:#0B1A12;
+      --hot:#2FD673;
+      --hot-soft:#12321F;
+      --cold:#1E5FD9;
+      --cold-soft:#142A4D;
+      --neutral-mid:#1A2A44;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1B33;
+    --surface:#16234A;
+    --surface-2:#1B2E52;
+    --text:#EAF0FF;
+    --text-dim:#9FB0D6;
+    --text-muted:#7C8CB3;
+    --border:#263C74;
+    --accent:#2FD673;
+    --brand:#CE1141;
+    --brand-ink:#FFFFFF;
+    --accent-ink:#0B1A12;
+    --hot:#2FD673;
+    --hot-soft:#12321F;
+    --cold:#1E5FD9;
+    --cold-soft:#142A4D;
+    --neutral-mid:#1A2A44;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Barlow Semi Condensed', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding-inline:16px;
+    padding-block: max(28px, env(safe-area-inset-top, 0px)) max(40px, env(safe-area-inset-bottom, 0px));
+  }
+  .wrap{ max-width: 880px; margin: 0 auto; display:flex; flex-direction:column; gap:28px; }
+
+  h1,h2,h3, .eyebrow, .zone-label, .tab, .split-title, .player-name{ font-family:'Barlow Semi Condensed', 'Arial Narrow', sans-serif; font-weight:700; }
+  .mono, .stat-value, .ops-value, .stat-label{ font-family:'IBM Plex Mono', 'Roboto Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:12px;
+    font-weight:600;
+    color:var(--brand);
+  }
+  h1{
+    font-size:clamp(26px, 5vw, 38px);
+    font-weight:600;
+    letter-spacing:.01em;
+    margin:6px 0 2px;
+    text-wrap:balance;
+    text-transform:uppercase;
+  }
+  .subtitle{ color:var(--text-dim); font-size:15px; max-width:60ch; line-height:1.5; }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:9.5px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:3px 8px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    color:var(--text-muted);
+    background:var(--surface-2);
+    width:fit-content;
+  }
+  .badge.illustrative{ color:var(--text-dim); border-color:var(--border); background:var(--surface-2); }
+  .badge.real{ color:var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:6px;
+    box-shadow:var(--shadow);
+    padding:20px;
+  }
+
+  /* Player header */
+  .player-card{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; }
+  .player-id{ display:flex; align-items:center; gap:14px; }
+  .player-number{
+    font-family:'Anton', sans-serif;
+    font-size:30px; font-weight:600;
+    color: var(--brand);
+    background: var(--surface-2);
+    border:1px solid var(--border);
+    width:64px; height:64px;
+    border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .player-name{ font-size:26px; font-weight:600; letter-spacing:.01em; text-transform:uppercase; }
+  .player-meta{ color:var(--text-muted); font-size:13px; margin-top:4px; letter-spacing:.03em; }
+  select#playerSelect{
+    font-family:'Barlow Semi Condensed', sans-serif;
+    font-size:14px;
+    padding:9px 14px;
+    border-radius:4px;
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text);
+    cursor:pointer;
+  }
+
+  /* Roster strip */
+  .roster{ display:flex; flex-wrap:wrap; gap:8px; }
+  .roster-chip{
+    font-family:'Barlow Semi Condensed', sans-serif;
+    font-size:12.5px; font-weight:600;
+    padding:7px 13px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text-dim);
+    cursor:pointer;
+  }
+  .roster-chip[aria-pressed="true"]{
+    background: color-mix(in srgb, var(--brand) 16%, var(--surface));
+    border-color: color-mix(in srgb, var(--brand) 45%, var(--border));
+    color:var(--text);
+  }
+
+  /* Split comparison */
+  .split-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:520px){ .split-grid{ grid-template-columns:1fr; } }
+  .split-panel{ background:var(--surface-2); border:1px solid var(--border); border-radius:4px; padding:16px; }
+  .split-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .split-title{ font-size:18px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; }
+  .split-ab{ color:var(--text-muted); font-size:12px; }
+  .stat-row{ display:flex; align-items:baseline; justify-content:space-between; padding:7px 0; border-top:1px solid var(--border); }
+  .stat-row:first-of-type{ border-top:none; }
+  .stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); }
+  .stat-value{ font-size:16px; font-weight:500; }
+  .split-panel.better .stat-value.ops{ color:var(--hot); }
+  .split-panel.worse .stat-value.ops{ color:var(--cold); }
+  .split-panel.better{ border-color: var(--hot); border-width: 2.5px; }
+  .split-panel.thin-sample{ border-color:#F0C36B; border-width:2px; border-style:dashed; }
+  .edge-note{ margin-top:14px; font-size:13px; color:var(--text-dim); line-height:1.5; }
+  .edge-note b{ color:var(--text); }
+
+  /* Zone heatmap */
+  .zone-card-head{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .tabs{ display:flex; gap:6px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:3px; }
+  .tab{
+    font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.05em;
+    padding:7px 14px; border-radius:4px; cursor:pointer; color:var(--text-dim);
+    border:none; background:transparent; font-family:inherit;
+  }
+  .tab[aria-selected="true"]{ background:var(--surface); color:var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+
+  .zone-body{ display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; margin-top:14px; }
+  .zone-plot{ flex:1 1 260px; max-width:320px; position:relative; }
+  .zone-plot svg{ width:100%; height:auto; display:block; }
+  .zone-side{ flex:1 1 220px; display:flex; flex-direction:column; gap:12px; }
+
+
+  .legend{ display:flex; align-items:center; gap:8px; font-size:11px; color:var(--text-muted); }
+  .legend-bar{
+    flex:1; height:8px; border-radius:4px;
+    background: linear-gradient(90deg, var(--cold), var(--neutral-mid), var(--hot));
+  }
+
+  .cell-tip{ font-size:12px; color:var(--text-dim); line-height:1.6; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; padding:12px 14px; }
+  .cell-tip b{ color:var(--text); }
+  .pending-note{ font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; font-size:14.5px; color:#F0C36B; line-height:1.6; background:#3A2E0F; border:1px solid #5C4A1A; border-radius:4px; padding:12px 15px; display:flex; gap:8px; align-items:flex-start; }
+  .pending-note b{ color:inherit; }
+
+  /* How this scales */
+  .steps{ display:flex; flex-direction:column; gap:14px; counter-reset:step; }
+  .step{ display:flex; gap:14px; }
+  .step-num{
+    counter-increment:step;
+    font-family:'Anton', sans-serif;
+    font-weight:600; font-size:14px;
+    color:var(--accent-ink);
+    background:var(--accent);
+    width:28px; height:28px; border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .step-body h3{ font-size:14.5px; font-weight:600; margin:0 0 3px; }
+  .step-body p{ font-size:13.5px; color:var(--text-dim); margin:0; line-height:1.55; }
+
+  footer{ color:var(--text-muted); font-size:12px; line-height:1.6; border-top:1px solid var(--border); padding-top:16px; }
+
+  h2{ font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); font-weight:600; margin:0 0 14px; }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<div class="wrap">
+
+  <header style="display:flex; flex-direction:column; gap:6px;">
+    <span class="eyebrow">Atlanta Braves</span>
+    <h1>Matchup Attack Chart</h1>
+    <p class="subtitle">How a hitter performs against left- and right-handed pitching — platoon splits, strike-zone tendencies, and pitch-type matchups, all scored against real MLB league averages so a thin sample gets pulled toward the mean instead of taken at face value.</p>
+  </header>
+
+  <section class="card" style="display:flex; flex-direction:column; gap:14px;">
+    <div class="player-card" style="gap:14px;">
+      <div class="player-id">
+        <div class="player-number" id="playerNumber">27</div>
+        <div>
+          <div class="player-name" id="playerName">Austin Riley</div>
+          <div class="player-meta" id="playerMeta">3B · Atlanta Braves · Bats R</div>
+        </div>
+      </div>
+      <select id="playerSelect" aria-label="Choose a batter" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;"></select>
+    </div>
+    <div class="roster" id="rosterStrip"></div>
+  </section>
+
+  <div class="tabs window-tabs" role="tablist" aria-label="Time window" id="windowTabs" style="align-self:flex-start;"></div>
+
+  <section class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+      <h2 style="margin:0;" id="splitTitle">Platoon split</h2>
+      <span class="badge real" id="splitBadge">Real · MLB data</span>
+    </div>
+    <div class="split-grid" id="splitGrid">
+      <div class="split-panel" id="panel-lhp">
+        <div class="split-header">
+          <span class="split-title">vs LHP</span>
+          <span class="split-ab" id="ab-lhp">—</span>
+        </div>
+        <div class="stat-row"><span class="stat-label">OBP</span><span class="stat-value mono" id="obp-lhp">—</span></div>
+        <div class="stat-row"><span class="stat-label">SLG</span><span class="stat-value mono" id="slg-lhp">—</span></div>
+        <div class="stat-row"><span class="stat-label">OPS</span><span class="stat-value mono" id="ops-lhp">—</span></div>
+        <div class="stat-row" id="woba-row-lhp"><span class="stat-label">wOBA</span><span class="stat-value mono ops" id="woba-lhp">—</span></div>
+      </div>
+      <div class="split-panel" id="panel-rhp">
+        <div class="split-header">
+          <span class="split-title">vs RHP</span>
+          <span class="split-ab" id="ab-rhp">—</span>
+        </div>
+        <div class="stat-row"><span class="stat-label">OBP</span><span class="stat-value mono" id="obp-rhp">—</span></div>
+        <div class="stat-row"><span class="stat-label">SLG</span><span class="stat-value mono" id="slg-rhp">—</span></div>
+        <div class="stat-row"><span class="stat-label">OPS</span><span class="stat-value mono" id="ops-rhp">—</span></div>
+        <div class="stat-row" id="woba-row-rhp"><span class="stat-label">wOBA</span><span class="stat-value mono ops" id="woba-rhp">—</span></div>
+      </div>
+    </div>
+    <div class="pending-note" id="splitPendingNote" style="display:none; margin-top:14px;"><span><b>This window hasn't been pulled yet</b> — these are still the full-season numbers, not real Last 60/30-day data. Run the updated notebook and send back the new <code class="mono">matchup_data.json</code> to fill this in.</span></div>
+    <div class="pending-note" id="smallSampleNote" style="display:none; margin-top:14px;"><span id="smallSampleText"></span></div>
+  </section>
+
+  <section class="card">
+    <div class="zone-card-head">
+      <h2 style="margin:0;">Strike zone performance</h2>
+      <span class="badge illustrative" id="zoneBadge">Sample data</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Pitcher handedness">
+      <button class="tab" role="tab" aria-selected="true" id="tab-rhp" data-hand="rhp">vs RHP</button>
+      <button class="tab" role="tab" aria-selected="false" id="tab-lhp" data-hand="lhp">vs LHP</button>
+    </div>
+
+    <div class="zone-body">
+      <div class="zone-plot">
+        <svg id="zoneSvg" viewBox="0 0 260 250" role="img" aria-label="Strike zone heat grid"></svg>
+      </div>
+      <div class="zone-side">
+        <div class="legend">
+          <span>Cold</span>
+          <span class="legend-bar" aria-hidden="true"></span>
+          <span>Hot</span>
+        </div>
+        <div class="cell-tip">
+          <div><b>50 = league average</b> for that zone. Warmer = more damage, cooler = more limited.</div>
+        </div>
+        <div class="cell-tip" id="hoverTip">Hover or tap a cell to see its value.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="zone-card-head">
+      <h2 style="margin:0;">Pitch type</h2>
+      <span class="badge illustrative" id="veloBadge">Sample data</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Pitcher handedness">
+      <button class="tab" role="tab" aria-selected="true" id="tab-rhp-velo" data-hand="rhp">vs RHP</button>
+      <button class="tab" role="tab" aria-selected="false" id="tab-lhp-velo" data-hand="lhp">vs LHP</button>
+    </div>
+
+    <div class="zone-body" style="flex-direction:column;">
+      <div class="zone-plot" style="max-width:none; width:100%;">
+        <svg id="veloSvg" viewBox="0 0 640 320" role="img" aria-label="Production by specific pitch type, sorted best to worst"></svg>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; width:100%;">
+        <div class="legend" style="flex:0 0 auto;">
+          <span>Cold</span>
+          <span class="legend-bar" aria-hidden="true" style="width:60px;"></span>
+          <span>Hot</span>
+        </div>
+        <div class="cell-tip" id="veloHoverTip" style="flex:1 1 260px; margin:0;">Sorted from his best pitch to attack down to his worst. Every pitch of that type he saw counts, not just PA-enders. Hover or tap a bar for the tier.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="steps">
+      <div class="step">
+        <div class="step-num"></div>
+        <div class="step-body">
+          <h3>Conclusion</h3>
+          <p>This is one repeatable data pipeline, not a one-off chart. The same script and shrinkage logic that built these eleven Braves hitters and three time windows extends to any roster, any cutoff, and any additional window just by re-running it. That's what makes it useful beyond a demo: a team could point this at next week's opponent, pull their active roster instead of the Braves', and have a real, league-relative attack chart for every hitter they're about to face, without changing a line of the underlying analysis, only which players and dates go in.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+</div>
+
+<script>
+(function(){
+
+  var PLAYERS = [
+    {
+      id: "baldwin", name: "Drake Baldwin", short: "Baldwin", number: "30", meta: "C · Atlanta Braves · Bats L", bats: "L",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 192, obp: '.313', slg: '.385', ops: 0.698, woba: 0.312 },
+          rhp: { ab: 319, obp: '.377', slg: '.498', ops: 0.875, woba: 0.382 },
+          zones: { rhp: [[41.7,69.0,55.3],[58.1,68.5,47.5],[49.2,71.8,49.9]], lhp: [[43.8,43.0,49.4],[35.1,50.5,41.3],[68.1,50.0,65.5]] },
+          zonesReal: true,
+          velo: { rhp: [63.2, 64.6, 44.1, 61.9, 39.8, 55.5], lhp: [62.6, 43.8, 50.1, 42.4, 68.6, 43.8] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 80, obp: '.262', slg: '.275', ops: 0.537, woba: 0.242 },
+          rhp: { ab: 152, obp: '.417', slg: '.586', ops: 1.003, woba: 0.432 },
+          zones: { rhp: [[41.6,69.4,48.9],[66.2,56.0,57.9],[58.8,80.9,44.4]], lhp: [[44.4,50.9,48.5],[45.5,49.1,42.8],[55.2,36.0,50.3]] },
+          zonesReal: true,
+          velo: { rhp: [63.9, 63.4, 43.5, 69.0, 49.9, 58.4], lhp: [53.5, 39.9, 42.1, 39.7, 52.0, 44.5] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 35, obp: '.263', slg: '.257', ops: 0.52, woba: 0.238 },
+          rhp: { ab: 85, obp: '.378', slg: '.565', ops: 0.943, woba: 0.404 },
+          zones: { rhp: [[42.8,50.1,48.6],[66.5,58.0,61.3],[49.2,61.1,48.6]], lhp: [[50.9,50.9,47.9],[43.2,47.6,45.1],[59.2,40.3,54.1]] },
+          zonesReal: true,
+          velo: { rhp: [63.6, 54.6, 45.6, 58.8, 42.1, 52.0], lhp: [54.5, 42.7, 44.3, 50.5, 47.2, 42.8] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "murphy", name: "Sean Murphy", short: "Murphy", number: "12", meta: "C · Atlanta Braves · Bats R", bats: "R",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 23, obp: '.231', slg: '.261', ops: 0.492, woba: 0.229 },
+          rhp: { ab: 62, obp: '.273', slg: '.387', ops: 0.66, woba: 0.29 },
+          zones: { rhp: [[56.6,47.9,49.1],[45.9,51.4,64.7],[40.1,57.5,35.4]], lhp: [[52.8,43.2,47.9],[43.2,58.0,44.3],[53.0,48.5,47.9]] },
+          zonesReal: true,
+          velo: { rhp: [39.5, 49.7, 53.9, 56.8, 43.6, 42.5], lhp: [35.4, 49.5, 60.7, 53.6, 42.5, 50.2] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 18, obp: '.286', slg: '.333', ops: 0.619, woba: 0.283 },
+          rhp: { ab: 53, obp: '.298', slg: '.434', ops: 0.732, woba: 0.321 },
+          zones: { rhp: [[61.4,47.9,50.9],[45.9,53.9,63.1],[40.1,59.5,36.9]], lhp: [[52.8,44.8,47.9],[43.2,58.0,48.0],[55.0,50.5,47.9]] },
+          zonesReal: true,
+          velo: { rhp: [44.6, 52.6, 54.3, 56.5, 43.6, 42.9], lhp: [40.3, 49.5, 60.7, 53.6, 45.9, 50.2] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 11, obp: '.357', slg: '.455', ops: 0.812, woba: 0.361 },
+          rhp: { ab: 43, obp: '.319', slg: '.465', ops: 0.784, woba: 0.343 },
+          zones: { rhp: [[63.2,50.1,50.9],[45.9,48.2,65.3],[41.9,59.5,39.4]], lhp: [[52.8,46.4,50.0],[47.6,63.2,48.0],[52.8,50.5,47.9]] },
+          zonesReal: true,
+          velo: { rhp: [44.7, 52.9, 52.2, 62.5, 43.6, 45.7], lhp: [47.4, 49.0, 63.3, 50.6, 47.9, 50.2] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "olson", name: "Matt Olson", short: "Olson", number: "28", meta: "1B · Atlanta Braves · Bats L", bats: "L",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 244, obp: '.316', slg: '.496', ops: 0.812, woba: 0.352 },
+          rhp: { ab: 344, obp: '.324', slg: '.512', ops: 0.836, woba: 0.36 },
+          zones: { rhp: [[62.8,36.2,63.4],[62.3,66.8,59.4],[57.3,53.9,61.7]], lhp: [[72.8,53.6,52.4],[55.1,69.7,31.1],[83.5,55.0,58.1]] },
+          zonesReal: true,
+          velo: { rhp: [52.5, 60.6, 60.2, 63.3, 37.9, 56.7], lhp: [48.8, 58.8, 63.3, 58.5, 44.4, 56.3] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 81, obp: '.256', slg: '.481', ops: 0.737, woba: 0.318 },
+          rhp: { ab: 136, obp: '.314', slg: '.441', ops: 0.755, woba: 0.331 },
+          zones: { rhp: [[55.9,37.3,53.9],[59.1,33.7,42.2],[59.3,71.0,53.6]], lhp: [[56.3,43.2,55.1],[41.4,77.2,33.2],[77.9,53.7,49.7]] },
+          zonesReal: true,
+          velo: { rhp: [45.8, 50.0, 52.0, 69.7, 41.3, 56.1], lhp: [46.3, 50.2, 63.5, 38.9, 47.7, 62.3] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 36, obp: '.256', slg: '.389', ops: 0.645, woba: 0.285 },
+          rhp: { ab: 74, obp: '.241', slg: '.297', ops: 0.538, woba: 0.239 },
+          zones: { rhp: [[45.4,33.7,57.3],[34.8,37.4,49.3],[54.3,52.6,50.4]], lhp: [[46.4,48.1,50.4],[45.3,69.2,48.6],[44.8,53.3,52.4]] },
+          zonesReal: true,
+          velo: { rhp: [34.0, 49.5, 44.2, 58.5, 45.5, 57.4], lhp: [55.0, 43.9, 49.9, 44.2, 48.6, 49.6] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "albies", name: "Ozzie Albies", short: "Albies", number: "1", meta: "2B · Atlanta Braves · Bats S", bats: "S",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 230, obp: '.304', slg: '.439', ops: 0.743, woba: 0.317 },
+          rhp: { ab: 350, obp: '.305', slg: '.389', ops: 0.694, woba: 0.303 },
+          zones: { rhp: [[45.5,46.9,60.9],[49.8,30.3,61.9],[47.6,44.1,53.1]], lhp: [[49.9,45.4,57.1],[61.2,60.7,63.1],[34.3,41.7,62.5]] },
+          zonesReal: true,
+          velo: { rhp: [47.6, 56.6, 56.9, 41.6, 38.6, 39.1], lhp: [46.8, 44.0, 40.0, 58.7, 46.5, 65.3] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 69, obp: '.274', slg: '.333', ops: 0.607, woba: 0.264 },
+          rhp: { ab: 144, obp: '.266', slg: '.368', ops: 0.634, woba: 0.278 },
+          zones: { rhp: [[48.4,50.2,67.4],[37.0,23.1,63.8],[43.6,37.9,57.1]], lhp: [[52.8,41.8,65.3],[43.3,41.5,57.4],[37.7,50.3,53.7]] },
+          zonesReal: true,
+          velo: { rhp: [39.7, 59.5, 45.6, 45.1, 40.4, 38.8], lhp: [36.5, 46.7, 50.2, 55.9, 47.8, 46.1] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 32, obp: '.242', slg: '.250', ops: 0.492, woba: 0.215 },
+          rhp: { ab: 76, obp: '.277', slg: '.368', ops: 0.645, woba: 0.28 },
+          zones: { rhp: [[48.4,45.6,64.7],[41.5,33.8,57.7],[40.8,48.3,52.5]], lhp: [[52.8,44.8,48.5],[47.6,47.6,46.1],[39.2,57.2,50.7]] },
+          zonesReal: true,
+          velo: { rhp: [43.9, 54.7, 44.5, 54.9, 41.7, 41.7], lhp: [43.9, 40.9, 50.0, 48.0, 49.2, 48.9] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "kim", name: "Ha-Seong Kim", short: "Kim", number: "7", meta: "SS · Atlanta Braves · Bats R", bats: "R",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 53, obp: '.140', slg: '.075', ops: 0.215, woba: 0.111 },
+          rhp: { ab: 58, obp: '.294', slg: '.190', ops: 0.484, woba: 0.238 },
+          zones: { rhp: [[42.8,45.6,46.7],[41.5,35.4,51.1],[48.5,49.7,50.6]], lhp: [[44.4,46.4,47.2],[41.4,34.2,35.5],[44.8,46.2,44.5]] },
+          zonesReal: true,
+          velo: { rhp: [44.3, 37.4, 42.6, 47.9, 54.4, 54.8], lhp: [36.5, 38.3, 45.3, 43.1, 43.2, 43.2] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 15, obp: '.133', slg: '.133', ops: 0.266, woba: 0.119 },
+          rhp: { ab: 23, obp: '.429', slg: '.348', ops: 0.777, woba: 0.36 },
+          zones: { rhp: [[46.8,50.0,48.0],[50.0,43.5,52.6],[57.0,50.3,51.6]], lhp: [[46.4,48.1,46.0],[43.2,47.6,50.0],[47.9,52.8,47.9]] },
+          zonesReal: true,
+          velo: { rhp: [52.4, 41.7, 49.7, 56.2, 51.9, 54.6], lhp: [41.4, 44.4, 49.1, 46.8, 51.2, 53.7] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 12, obp: '.167', slg: '.167', ops: 0.334, woba: 0.148 },
+          rhp: { ab: 23, obp: '.429', slg: '.348', ops: 0.777, woba: 0.36 },
+          zones: { rhp: [[46.8,50.0,48.0],[50.0,43.5,52.6],[57.0,50.3,51.6]], lhp: [[48.1,48.1,46.0],[47.6,47.6,50.0],[47.9,52.8,47.9]] },
+          zonesReal: true,
+          velo: { rhp: [52.4, 41.7, 49.7, 56.2, 51.9, 54.6], lhp: [42.7, 46.9, 50.0, 47.2, 50.8, 53.7] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "riley", name: "Austin Riley", short: "Riley", number: "27", meta: "3B · Atlanta Braves · Bats R", bats: "R",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 153, obp: '.316', slg: '.320', ops: 0.636, woba: 0.29 },
+          rhp: { ab: 380, obp: '.287', slg: '.382', ops: 0.669, woba: 0.295 },
+          zones: { rhp: [[49.0,31.8,44.4],[48.7,55.6,60.4],[48.6,49.1,45.1]], lhp: [[40.4,49.3,35.6],[42.5,43.2,49.8],[48.3,58.6,53.1]] },
+          zonesReal: true,
+          velo: { rhp: [41.3, 52.8, 55.0, 43.2, 44.6, 43.0], lhp: [52.6, 40.0, 42.5, 48.6, 54.5, 47.8] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 39, obp: '.348', slg: '.359', ops: 0.707, woba: 0.324 },
+          rhp: { ab: 151, obp: '.294', slg: '.444', ops: 0.738, woba: 0.318 },
+          zones: { rhp: [[51.0,47.1,65.6],[54.8,63.3,32.9],[52.4,48.4,53.1]], lhp: [[45.9,48.4,37.8],[43.2,49.6,46.1],[44.8,64.9,63.0]] },
+          zonesReal: true,
+          velo: { rhp: [49.2, 52.7, 45.0, 45.1, 53.3, 42.4], lhp: [41.6, 35.7, 52.4, 52.9, 65.9, 56.1] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 18, obp: '.200', slg: '.167', ops: 0.367, woba: 0.178 },
+          rhp: { ab: 77, obp: '.310', slg: '.377', ops: 0.687, woba: 0.302 },
+          zones: { rhp: [[43.4,40.5,72.0],[36.4,58.0,40.7],[58.0,47.8,52.6]], lhp: [[46.4,46.4,44.1],[47.6,45.3,46.1],[45.9,50.5,58.7]] },
+          zonesReal: true,
+          velo: { rhp: [54.2, 47.2, 44.6, 52.3, 47.2, 42.7], lhp: [40.5, 37.9, 49.8, 52.2, 50.6, 51.7] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "dubon", name: "Mauricio Dubón", short: "Dubón", number: "14", meta: "LF · Atlanta Braves · Bats R", bats: "R",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 185, obp: '.291', slg: '.378', ops: 0.669, woba: 0.293 },
+          rhp: { ab: 351, obp: '.333', slg: '.390', ops: 0.723, woba: 0.321 },
+          zones: { rhp: [[48.2,47.3,53.6],[47.6,58.2,49.5],[33.0,49.1,50.2]], lhp: [[42.6,51.8,55.5],[58.3,31.5,41.2],[51.3,59.8,43.8]] },
+          zonesReal: true,
+          velo: { rhp: [41.8, 48.9, 56.8, 50.9, 64.3, 49.1], lhp: [39.4, 50.9, 55.5, 57.5, 51.0, 55.2] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 56, obp: '.281', slg: '.304', ops: 0.585, woba: 0.251 },
+          rhp: { ab: 137, obp: '.333', slg: '.336', ops: 0.669, woba: 0.3 },
+          zones: { rhp: [[54.2,41.1,48.9],[37.9,57.1,41.6],[38.4,45.1,48.1]], lhp: [[45.9,41.8,57.1],[49.6,36.4,44.3],[48.5,49.0,49.7]] },
+          zonesReal: true,
+          velo: { rhp: [40.5, 52.1, 47.3, 50.9, 49.1, 48.9], lhp: [45.7, 50.2, 44.9, 38.6, 55.1, 54.2] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 23, obp: '.375', slg: '.391', ops: 0.766, woba: 0.341 },
+          rhp: { ab: 74, obp: '.358', slg: '.351', ops: 0.709, woba: 0.318 },
+          zones: { rhp: [[53.0,44.4,49.6],[39.1,59.3,44.5],[43.7,48.3,48.4]], lhp: [[47.4,46.4,54.9],[47.6,43.2,52.6],[57.1,50.5,50.3]] },
+          zonesReal: true,
+          velo: { rhp: [36.9, 52.7, 46.0, 57.1, 51.1, 56.1], lhp: [49.9, 57.5, 48.0, 45.8, 50.5, 49.8] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "yastrzemski", name: "Mike Yastrzemski", short: "Yastrzemski", number: "18", meta: "LF · Atlanta Braves · Bats L", bats: "L",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 32, obp: '.297', slg: '.219', ops: 0.516, woba: 0.249 },
+          rhp: { ab: 301, obp: '.317', slg: '.395', ops: 0.712, woba: 0.315 },
+          zones: { rhp: [[41.4,45.5,55.4],[38.0,55.7,46.1],[68.0,39.4,52.3]], lhp: [[47.4,49.1,40.8],[43.2,39.3,42.6],[45.9,61.3,56.4]] },
+          zonesReal: true,
+          velo: { rhp: [45.3, 62.8, 47.3, 46.4, 58.4, 41.8], lhp: [53.4, 44.8, 47.2, 39.3, 47.8, 48.5] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 2, obp: '.000', slg: '.000', ops: 0.0, woba: 0.0 },
+          rhp: { ab: 101, obp: '.304', slg: '.416', ops: 0.72, woba: 0.315 },
+          zones: { rhp: [[45.4,50.1,44.1],[46.1,71.9,59.5],[53.8,35.5,50.6]], lhp: [[48.1,50.0,50.0],[50.0,50.0,50.0],[47.9,50.0,50.0]] },
+          zonesReal: true,
+          velo: { rhp: [45.6, 58.9, 50.3, 39.5, 66.1, 40.5], lhp: [48.4, 50.0, 50.0, 48.1, 49.7, 50.0] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 2, obp: '.000', slg: '.000', ops: 0.0, woba: 0.0 },
+          rhp: { ab: 59, obp: '.313', slg: '.305', ops: 0.618, woba: 0.284 },
+          zones: { rhp: [[46.8,52.3,47.9],[42.0,54.3,44.4],[50.7,43.2,51.6]], lhp: [[48.1,50.0,50.0],[50.0,50.0,50.0],[47.9,50.0,50.0]] },
+          zonesReal: true,
+          velo: { rhp: [45.0, 55.4, 59.0, 36.3, 58.5, 39.8], lhp: [48.4, 50.0, 50.0, 48.1, 49.7, 50.0] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "harris", name: "Michael Harris II", short: "Harris II", number: "23", meta: "CF · Atlanta Braves · Bats L", bats: "L",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 197, obp: '.322', slg: '.462', ops: 0.784, woba: 0.341 },
+          rhp: { ab: 358, obp: '.314', slg: '.500', ops: 0.814, woba: 0.351 },
+          zones: { rhp: [[64.8,81.8,53.2],[43.5,33.0,68.0],[52.4,60.1,48.7]], lhp: [[57.9,48.0,41.7],[39.9,65.3,47.2],[70.3,55.8,56.8]] },
+          zonesReal: true,
+          velo: { rhp: [60.1, 53.0, 48.3, 57.9, 34.4, 50.8], lhp: [39.6, 42.1, 48.8, 64.3, 44.5, 62.1] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 74, obp: '.316', slg: '.514', ops: 0.83, woba: 0.359 },
+          rhp: { ab: 147, obp: '.287', slg: '.469', ops: 0.756, woba: 0.325 },
+          zones: { rhp: [[43.4,46.7,44.9],[39.6,36.8,69.3],[61.6,63.4,47.3]], lhp: [[60.5,45.9,44.1],[36.8,63.4,57.3],[58.9,52.1,58.4]] },
+          zonesReal: true,
+          velo: { rhp: [45.9, 62.6, 40.9, 67.8, 39.7, 36.7], lhp: [51.8, 46.4, 38.2, 68.1, 43.7, 49.8] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 34, obp: '.314', slg: '.412', ops: 0.726, woba: 0.319 },
+          rhp: { ab: 77, obp: '.308', slg: '.532', ops: 0.84, woba: 0.363 },
+          zones: { rhp: [[46.9,50.2,45.7],[42.4,51.9,57.8],[54.2,66.6,53.9]], lhp: [[53.4,44.8,46.0],[41.2,43.4,50.5],[67.6,47.3,55.3]] },
+          zonesReal: true,
+          velo: { rhp: [41.7, 54.9, 46.9, 74.6, 44.4, 44.9], lhp: [44.4, 56.8, 44.6, 51.1, 50.4, 50.3] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "acuna", name: "Ronald Acuña Jr.", short: "Acuña Jr.", number: "13", meta: "RF · Atlanta Braves · Bats R", bats: "R",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 118, obp: '.341', slg: '.415', ops: 0.756, woba: 0.337 },
+          rhp: { ab: 260, obp: '.348', slg: '.462', ops: 0.81, woba: 0.353 },
+          zones: { rhp: [[48.7,34.9,67.6],[48.4,26.7,42.1],[58.3,82.4,70.3]], lhp: [[40.4,37.9,65.6],[51.4,50.5,63.0],[59.6,61.6,44.1]] },
+          zonesReal: true,
+          velo: { rhp: [44.5, 74.8, 51.4, 56.9, 57.6, 50.6], lhp: [50.7, 55.2, 36.7, 65.9, 51.7, 54.0] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 51, obp: '.379', slg: '.549', ops: 0.928, woba: 0.403 },
+          rhp: { ab: 132, obp: '.291', slg: '.447', ops: 0.738, woba: 0.32 },
+          zones: { rhp: [[45.7,50.3,60.7],[51.7,37.3,44.2],[52.4,59.4,60.8]], lhp: [[43.0,41.8,55.0],[55.7,59.0,57.3],[53.4,72.6,46.1]] },
+          zonesReal: true,
+          velo: { rhp: [51.6, 58.3, 41.6, 60.9, 48.4, 40.1], lhp: [50.6, 60.4, 42.4, 67.2, 52.4, 60.4] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 29, obp: '.333', slg: '.379', ops: 0.712, woba: 0.321 },
+          rhp: { ab: 83, obp: '.337', slg: '.494', ops: 0.831, woba: 0.358 },
+          zones: { rhp: [[50.9,57.7,61.0],[57.8,44.0,42.8],[42.5,59.4,60.8]], lhp: [[44.4,48.1,54.9],[57.3,47.6,55.0],[51.4,48.5,46.1]] },
+          zonesReal: true,
+          velo: { rhp: [60.6, 47.6, 42.5, 58.6, 48.9, 44.0], lhp: [48.0, 44.3, 42.9, 62.4, 51.8, 53.3] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    },
+    {
+      id: "smith", name: "Dominic Smith", short: "D. Smith", number: "8", meta: "DH · Atlanta Braves · Bats L", bats: "L",
+      windows: {
+        season: {
+          label: "2026 Season",
+          lhp: { ab: 32, obp: '.250', slg: '.188', ops: 0.438, woba: 0.211 },
+          rhp: { ab: 231, obp: '.324', slg: '.403', ops: 0.727, woba: 0.316 },
+          zones: { rhp: [[49.5,54.5,60.1],[27.1,38.7,56.2],[61.6,40.0,43.4]], lhp: [[44.8,49.1,50.0],[47.4,43.2,48.0],[50.4,42.5,51.4]] },
+          zonesReal: true,
+          velo: { rhp: [53.6, 34.6, 52.3, 56.2, 51.5, 39.8], lhp: [44.0, 49.7, 45.8, 47.0, 48.5, 50.5] },
+          veloReal: true,
+          pending: false
+        },
+        last60: {
+          label: "Last 60 Days",
+          lhp: { ab: 5, obp: '.200', slg: '.200', ops: 0.4, woba: 0.178 },
+          rhp: { ab: 49, obp: '.309', slg: '.347', ops: 0.656, woba: 0.297 },
+          zones: { rhp: [[50.0,44.0,45.7],[47.7,45.2,57.7],[58.3,43.7,50.4]], lhp: [[48.1,50.9,50.0],[50.0,50.0,48.0],[50.0,50.0,48.9]] },
+          zonesReal: true,
+          velo: { rhp: [35.4, 40.2, 53.9, 60.6, 52.1, 57.2], lhp: [49.1, 51.4, 47.7, 46.0, 50.0, 50.0] },
+          veloReal: true,
+          pending: false
+        },
+        last30: {
+          label: "Last 30 Days",
+          lhp: { ab: 1, obp: '.000', slg: '.000', ops: 0.0, woba: 0.0 },
+          rhp: { ab: 16, obp: '.176', slg: '.125', ops: 0.301, woba: 0.145 },
+          zones: { rhp: [[50.0,47.7,48.0],[47.7,47.2,46.9],[50.0,45.2,48.8]], lhp: [[48.1,50.0,50.0],[50.0,50.0,50.0],[50.0,50.0,50.0]] },
+          zonesReal: true,
+          velo: { rhp: [42.0, 40.3, 48.2, 50.5, 50.3, 51.9], lhp: [50.0, 50.0, 47.7, 50.0, 50.0, 50.0] },
+          veloReal: true,
+          pending: false
+        }
+      }
+    }
+  ];
+  var ROW_LABELS = ["High", "Middle", "Low"];
+  var COL_LABELS = ["Away", "Middle", "In"];
+  var PITCH_TYPES = ["Four-seam", "Sinker", "Cutter", "Slider", "Curveball", "Changeup"];
+  var WINDOW_DEFS = [
+    { key: "season", label: "2026 Season" },
+    { key: "last60", label: "Last 60 Days" },
+    { key: "last30", label: "Last 30 Days" }
+  ];
+
+  var svg = document.getElementById('zoneSvg');
+  var tip = document.getElementById('hoverTip');
+  var veloSvg = document.getElementById('veloSvg');
+  var veloTip = document.getElementById('veloHoverTip');
+  var select = document.getElementById('playerSelect');
+  var roster = document.getElementById('rosterStrip');
+  var windowTabsEl = document.getElementById('windowTabs');
+  var currentPlayer = PLAYERS[0];
+  var currentHand = 'rhp';
+  var currentWindow = 'season';
+
+  // Returns the data for the selected window, falling back to the season window (with a flag)
+  // when the selected window hasn't been pulled yet — never fabricates numbers for a missing window.
+  function activeWindowData(){
+    var w = currentPlayer.windows[currentWindow];
+    if (w && !w.pending) return { data: w, fellBack: false };
+    return { data: currentPlayer.windows.season, fellBack: true };
+  }
+
+  function colorFor(v){
+    var raw = (v - 50) / 50;
+    var t = Math.pow(Math.abs(raw), 0.35) * (raw < 0 ? -1 : 1);
+    var css = getComputedStyle(document.documentElement);
+    var cold = css.getPropertyValue('--cold').trim();
+    var hot = css.getPropertyValue('--hot').trim();
+    var mid = css.getPropertyValue('--neutral-mid').trim();
+    if (t >= 0) return mixHex(mid, hot, t);
+    return mixHex(mid, cold, -t);
+  }
+  function hexToRgb(h){
+    h = h.replace('#','');
+    return [parseInt(h.substring(0,2),16), parseInt(h.substring(2,4),16), parseInt(h.substring(4,6),16)];
+  }
+  function mixHex(a,b,t){
+    var ca = hexToRgb(a), cb = hexToRgb(b);
+    var r = Math.round(ca[0] + (cb[0]-ca[0])*t);
+    var g = Math.round(ca[1] + (cb[1]-ca[1])*t);
+    var bl = Math.round(ca[2] + (cb[2]-ca[2])*t);
+    return 'rgb(' + r + ',' + g + ',' + bl + ')';
+  }
+
+  function renderGrid(targetSvg, grid, rowLabels, colLabels, tipEl, colorGrid){
+    var cell = 68, gap = 4, originX = 40, originY = 20;
+    var parts = [];
+    colorGrid = colorGrid || grid;
+
+    for (var r = 0; r < 3; r++){
+      for (var c = 0; c < 3; c++){
+        var v = grid[r][c];
+        var cv = colorGrid[r][c];
+        var x = originX + c * (cell + gap);
+        var y = originY + r * (cell + gap);
+        var fill = colorFor(cv);
+        var textColor = '#FFFFFF';
+        parts.push(
+          '<rect data-r="'+r+'" data-c="'+c+'" data-v="'+v+'" data-cv="'+cv+'" x="'+x+'" y="'+y+'" width="'+cell+'" height="'+cell+
+          '" rx="6" fill="'+fill+'" stroke="var(--border)" stroke-width="1" style="cursor:pointer" />'
+        );
+        parts.push(
+          '<text x="'+(x+cell/2)+'" y="'+(y+cell/2+5)+'" text-anchor="middle" font-size="14" font-weight="700" font-family="Barlow Semi Condensed, sans-serif" fill="'+textColor+'" stroke="#000000" stroke-width="0.4" paint-order="stroke" pointer-events="none">'+Math.round(v)+'</text>'
+        );
+      }
+    }
+    for (var c2 = 0; c2 < 3; c2++){
+      var lx = originX + c2 * (cell + gap) + cell/2;
+      parts.push('<text x="'+lx+'" y="12" text-anchor="middle" font-size="10" font-family="Barlow Semi Condensed, sans-serif" letter-spacing="0.06em" fill="var(--text-muted)">'+colLabels[c2].toUpperCase()+'</text>');
+    }
+    for (var r2 = 0; r2 < 3; r2++){
+      var ly = originY + r2 * (cell + gap) + cell/2 + 4;
+      // "Middle" is too wide for the axis margin at this font size and clips off the left edge of the
+      // SVG viewBox, so the axis uses a short label here while the hover tooltip still uses the full word.
+      var axisLabel = rowLabels[r2] === 'Middle' ? 'Mid' : rowLabels[r2];
+      parts.push('<text x="30" y="'+ly+'" text-anchor="end" font-size="10" font-family="Barlow Semi Condensed, sans-serif" letter-spacing="0.06em" fill="var(--text-muted)">'+axisLabel.toUpperCase()+'</text>');
+    }
+
+    targetSvg.innerHTML = parts.join('');
+
+    var rects = targetSvg.querySelectorAll('rect');
+    rects.forEach(function(rect){
+      rect.addEventListener('mouseenter', showTip);
+      rect.addEventListener('click', showTip);
+    });
+
+    function showTip(e){
+      var r = e.target.getAttribute('data-r'), c = e.target.getAttribute('data-c');
+      var cv = Number(e.target.getAttribute('data-cv'));
+      tipEl.innerHTML = '<b>' + rowLabels[r] + ' &middot; ' + colLabels[c] + '</b> — ' + tierLabel(cv);
+    }
+  }
+
+  function tierLabel(v){
+    if (v >= 65) return 'Strong production';
+    if (v >= 50) return 'Above average';
+    if (v >= 35) return 'Average';
+    if (v >= 20) return 'Below average';
+    return 'Limited production';
+  }
+
+  function renderZone(hand){
+    var w = activeWindowData().data;
+    var raw = w.zones[hand];
+    // Real zone values are already on a calibrated 0-100 scale (50 = league average for that
+    // zone cell), so they're used directly for color — no per-player renormalization needed.
+    renderGrid(svg, raw, ROW_LABELS, COL_LABELS, tip, raw);
+  }
+
+  function renderVelo(hand){
+    var w = activeWindowData().data;
+    var values = w.velo[hand];
+    var order = PITCH_TYPES.map(function(_, i){ return i; })
+      .sort(function(a, b){ return values[b] - values[a]; }); // best to worst
+
+    var chartTop = 24, chartBottom = 250, chartLeft = 40, chartRight = 620;
+    var barCount = order.length;
+    var slotWidth = (chartRight - chartLeft) / barCount;
+    var barWidth = slotWidth * 0.55;
+    var parts = [];
+
+    [0, 50, 100].forEach(function(v){
+      var y = chartBottom - (v / 100) * (chartBottom - chartTop);
+      parts.push('<line x1="' + chartLeft + '" y1="' + y + '" x2="' + chartRight + '" y2="' + y + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,3" />');
+      parts.push('<text x="' + (chartLeft - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--text-muted)">' + v + '</text>');
+    });
+
+    order.forEach(function(i, slot){
+      var v = values[i];
+      var slotX = chartLeft + slot * slotWidth;
+      var barH = Math.max(0, (v / 100) * (chartBottom - chartTop));
+      var x = slotX + (slotWidth - barWidth) / 2;
+      var y = chartBottom - barH;
+      parts.push(
+        '<rect data-i="' + i + '" data-v="' + v + '" x="' + x + '" y="' + y +
+        '" width="' + barWidth + '" height="' + barH + '" rx="4" fill="' + colorFor(v) + '" stroke="var(--border)" stroke-width="1" style="cursor:pointer" />'
+      );
+      var lx = slotX + slotWidth / 2;
+      parts.push('<text x="' + lx + '" y="' + (chartBottom + 20) + '" text-anchor="middle" font-size="12" font-weight="600" font-family="Barlow Semi Condensed, sans-serif" letter-spacing="0.02em" fill="var(--text)">' + PITCH_TYPES[i].toUpperCase() + '</text>');
+      parts.push('<text x="' + lx + '" y="' + (chartBottom + 36) + '" text-anchor="middle" font-size="10" font-family="Inter, sans-serif" fill="var(--text-muted)">' + tierLabel(v) + '</text>');
+    });
+
+    veloSvg.innerHTML = parts.join('');
+
+    var rects = veloSvg.querySelectorAll('rect[data-v]');
+    rects.forEach(function(rect){
+      rect.addEventListener('mouseenter', showVeloTip);
+      rect.addEventListener('click', showVeloTip);
+    });
+
+    function showVeloTip(e){
+      var i = e.target.getAttribute('data-i'), v = Number(e.target.getAttribute('data-v'));
+      veloTip.innerHTML = '<b>' + PITCH_TYPES[i] + '</b> — ' + tierLabel(v);
+    }
+  }
+
+  function setTab(hand){
+    currentHand = hand;
+    document.getElementById('tab-rhp').setAttribute('aria-selected', hand === 'rhp');
+    document.getElementById('tab-lhp').setAttribute('aria-selected', hand === 'lhp');
+    document.getElementById('tab-rhp-velo').setAttribute('aria-selected', hand === 'rhp');
+    document.getElementById('tab-lhp-velo').setAttribute('aria-selected', hand === 'lhp');
+    renderZone(hand);
+    renderVelo(hand);
+  }
+
+  function fmt(v){ return v === null ? '—' : v.toFixed(3).replace(/^0/, ''); }
+
+  function buildWindowTabs(){
+    windowTabsEl.innerHTML = '';
+    WINDOW_DEFS.forEach(function(w){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tab';
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', w.key === currentWindow);
+      btn.setAttribute('data-window', w.key);
+      btn.textContent = w.label;
+      btn.addEventListener('click', function(){
+        currentWindow = w.key;
+        syncWindowTabs();
+        renderPlayer();
+      });
+      windowTabsEl.appendChild(btn);
+    });
+  }
+
+  function syncWindowTabs(){
+    windowTabsEl.querySelectorAll('.tab').forEach(function(btn){
+      btn.setAttribute('aria-selected', btn.getAttribute('data-window') === currentWindow);
+    });
+  }
+
+  function renderPlayer(){
+    var p = currentPlayer;
+    document.getElementById('playerNumber').textContent = p.number;
+    document.getElementById('playerName').textContent = p.name;
+    document.getElementById('playerMeta').textContent = p.meta;
+
+    var active = activeWindowData();
+    var w = active.data;
+
+    document.getElementById('splitTitle').textContent = 'Platoon split — ' + w.label;
+    document.getElementById('splitPendingNote').style.display = active.fellBack && currentWindow !== 'season' ? 'block' : 'none';
+
+    var SMALL_SAMPLE_AB = 20;
+    var smallNote = document.getElementById('smallSampleNote');
+    var smallText = document.getElementById('smallSampleText');
+    var panelLEl = document.getElementById('panel-lhp');
+    var panelREl = document.getElementById('panel-rhp');
+    var lhpThin = !active.fellBack && !w.pending && w.lhp.ab < SMALL_SAMPLE_AB;
+    var rhpThin = !active.fellBack && !w.pending && w.rhp.ab < SMALL_SAMPLE_AB;
+    panelLEl.classList.toggle('thin-sample', lhpThin);
+    panelREl.classList.toggle('thin-sample', rhpThin);
+    if (lhpThin || rhpThin) {
+      var thinSides = [];
+      if (lhpThin) thinSides.push('vs LHP (' + w.lhp.ab + ' AB)');
+      if (rhpThin) thinSides.push('vs RHP (' + w.rhp.ab + ' AB)');
+      smallText.innerHTML = '<b>Small sample</b> — only ' + thinSides.join(' and ') + ' in this window. Real data, but too few at-bats to read as a settled trend.';
+      smallNote.style.display = 'block';
+    } else {
+      smallNote.style.display = 'none';
+    }
+
+    document.getElementById('ab-lhp').textContent = w.lhp.ab ? (w.lhp.ab + ' AB') : 'pulling…';
+    document.getElementById('obp-lhp').textContent = w.lhp.obp;
+    document.getElementById('slg-lhp').textContent = w.lhp.slg;
+    document.getElementById('ops-lhp').textContent = w.lhp.ops === null || w.lhp.ops === undefined ? '—' : fmt(w.lhp.ops);
+    var lhpHasWoba = w.lhp.woba !== null && w.lhp.woba !== undefined;
+    document.getElementById('woba-lhp').textContent = lhpHasWoba ? fmt(w.lhp.woba) : '—';
+    document.getElementById('woba-row-lhp').style.display = lhpHasWoba ? '' : 'none';
+
+    document.getElementById('ab-rhp').textContent = w.rhp.ab ? (w.rhp.ab + ' AB') : 'pulling…';
+    document.getElementById('obp-rhp').textContent = w.rhp.obp;
+    document.getElementById('slg-rhp').textContent = w.rhp.slg;
+    document.getElementById('ops-rhp').textContent = w.rhp.ops === null || w.rhp.ops === undefined ? '—' : fmt(w.rhp.ops);
+    var rhpHasWoba = w.rhp.woba !== null && w.rhp.woba !== undefined;
+    document.getElementById('woba-rhp').textContent = rhpHasWoba ? fmt(w.rhp.woba) : '—';
+    document.getElementById('woba-row-rhp').style.display = rhpHasWoba ? '' : 'none';
+
+    var panelL = document.getElementById('panel-lhp');
+    var panelR = document.getElementById('panel-rhp');
+    panelL.classList.remove('better','worse');
+    panelR.classList.remove('better','worse');
+
+    if (!w.pending){
+      // Compare by wOBA when available (both windows have it), otherwise fall back to OPS.
+      var lhpKey = lhpHasWoba && rhpHasWoba ? 'woba' : 'ops';
+      var betterSide = w.lhp[lhpKey] > w.rhp[lhpKey] ? 'lhp' : 'rhp';
+      var worseSide = betterSide === 'lhp' ? 'rhp' : 'lhp';
+      (betterSide === 'lhp' ? panelL : panelR).classList.add('better');
+      (worseSide === 'lhp' ? panelL : panelR).classList.add('worse');
+    }
+
+    var zoneBadge = document.getElementById('zoneBadge');
+    if (w.zonesReal){
+      zoneBadge.className = 'badge real';
+      zoneBadge.textContent = 'Real · Statcast' + (active.fellBack && currentWindow !== 'season' ? ' (season shown)' : '');
+    } else {
+      zoneBadge.className = 'badge illustrative';
+      zoneBadge.textContent = 'Sample data';
+    }
+
+    var veloBadge = document.getElementById('veloBadge');
+    if (w.veloReal){
+      veloBadge.className = 'badge real';
+      veloBadge.textContent = 'Real · Statcast' + (active.fellBack && currentWindow !== 'season' ? ' (season shown)' : '');
+    } else {
+      veloBadge.className = 'badge illustrative';
+      veloBadge.textContent = 'Sample data';
+    }
+
+    renderZone(currentHand);
+    renderVelo(currentHand);
+  }
+
+  function buildSelector(){
+    PLAYERS.forEach(function(p){
+      var opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name + (p.windows && p.windows.season && p.windows.season.pending ? ' (splits pending)' : '');
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', function(){
+      currentPlayer = PLAYERS.filter(function(p){ return p.id === select.value; })[0];
+      syncRoster();
+      renderPlayer();
+    });
+
+    PLAYERS.forEach(function(p){
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'roster-chip';
+      chip.textContent = p.short || p.name.split(' ').slice(-1)[0];
+      chip.setAttribute('aria-pressed', p.id === currentPlayer.id);
+      chip.addEventListener('click', function(){
+        currentPlayer = p;
+        select.value = p.id;
+        syncRoster();
+        renderPlayer();
+      });
+      roster.appendChild(chip);
+    });
+  }
+
+  function syncRoster(){
+    var chips = roster.querySelectorAll('.roster-chip');
+    chips.forEach(function(chip, i){
+      chip.setAttribute('aria-pressed', PLAYERS[i].id === currentPlayer.id);
+    });
+    select.value = currentPlayer.id;
+  }
+
+  document.getElementById('tab-rhp').addEventListener('click', function(){ setTab('rhp'); });
+  document.getElementById('tab-lhp').addEventListener('click', function(){ setTab('lhp'); });
+  document.getElementById('tab-rhp-velo').addEventListener('click', function(){ setTab('rhp'); });
+  document.getElementById('tab-lhp-velo').addEventListener('click', function(){ setTab('lhp'); });
+
+  buildSelector();
+  buildWindowTabs();
+  renderPlayer();
+})();
+</script>
