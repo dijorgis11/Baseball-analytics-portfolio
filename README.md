@@ -5,9 +5,12 @@ A collection of baseball analytics projects using Python, Statcast data, and Tab
 ## Projects
 
 ### 1. Matchup Attack Chart
-Live: https://dijorgis11.github.io/Baseball-analytics-portfolio/matchup_attack_chart.html
 
 A platoon-split and strike-zone scouting view — how a hitter performs against left- and right-handed pitching, scored against real MLB league averages so small samples get pulled toward the mean instead of read at face value.
+
+Tools: Python, pybaseball, Statcast, Google Colab
+
+https://dijorgis11.github.io/Baseball-analytics-portfolio/matchup_attack_chart.html
 
 ### 2. Pitcher Fatigue Risk Index - Spencer Strider
 
