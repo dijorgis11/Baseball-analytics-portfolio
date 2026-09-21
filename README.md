@@ -4,7 +4,12 @@ A collection of baseball analytics projects using Python, Statcast data, and Tab
 
 ## Projects
 
-### 1. Pitcher Fatigue Risk Index - Spencer Strider
+### 1. Matchup Attack Chart
+Live: https://dijorgis11.github.io/Baseball-analytics-portfolio/matchup_attack_chart.html
+
+A platoon-split and strike-zone scouting view — how a hitter performs against left- and right-handed pitching, scored against real MLB league averages so small samples get pulled toward the mean instead of read at face value.
+
+### 2. Pitcher Fatigue Risk Index - Spencer Strider
 
 A Python tool that scores every start of a pitcher's season against his own recent performance baseline (velocity, spin rate, release point, and workload) to flag rising injury risk before it becomes a medical event. Validated against Spencer Strider's real 2024 UCL injury, the index flagged elevated risk in his final two starts before he went down.
 
@@ -12,21 +17,21 @@ Tools: Python, pybaseball, Statcast, Google Colab
 
 [View Notebook](pitcher_fatigue_risk_index_Spencer_Strider.ipynb)
 
-### 2. AL East Lineup xwOBA Analyzer
+### 3. AL East Lineup xwOBA Analyzer
 A Python tool that pulls 2024 Statcast data from Baseball Savant and displays each AL East team's xwOBA splits against right-handed and left-handed pitching. Built using pybaseball in Google Colab.
 
 Tools: Python, pybaseball, Statcast, Google Colab
 
 [View Notebook](Lineup_xwOBA_Analyzer_—_AL_East_(2024).ipynb)
 
-### 3. Murakami Power Analysis
+### 4. Murakami Power Analysis
 A Tableau dashboard analyzing Munetaka Murakami's power profile during his 2026 MLB debut season. Murakami ranks among the top players in expected home runs and is the only player in that group with a positive xHR differential, supported by an above-average contact quality profile.
 
 Tools: Tableau, Statcast exit velocity data
 
 [View Dashboard](https://public.tableau.com/app/profile/jorge.rodrigues2398/viz/MURAKAMI2026-JorgeRodrigues/Murakamiincrediblestartofthe2026season?publish=yes)
 
-### 4. The Evolution of the 9th Batter
+### 5. The Evolution of the 9th Batter
 A written analysis on how the 9th batting spot has changed from an automatic out to a strategic asset in modern baseball. Covers the at-bat deficit, the second leadoff concept, and how the universal DH rule accelerated the shift.
 
 Tools: Baseball Reference, Lahman Database
