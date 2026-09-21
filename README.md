@@ -6,7 +6,7 @@ A collection of baseball analytics projects using Python, Statcast data, and Tab
 
 ### 1. Matchup Attack Chart
 
-A platoon-split and strike-zone scouting view — how a hitter performs against left- and right-handed pitching, scored against real MLB league averages so small samples get pulled toward the mean instead of read at face value.
+A platoon-split and strike-zone scouting view, how a hitter performs against left- and right-handed pitching, scored against real MLB league averages so small samples get pulled toward the mean instead of read at face value.
 
 Tools: Python, pybaseball, Statcast, Google Colab
 
