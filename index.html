@@ -34,6 +34,7 @@
   .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
   .btn { display: inline-block; padding: 11px 20px; border: 2px solid var(--ink); border-radius: 8px; font-weight: 600; text-decoration: none; }
   .btn.primary { background: var(--ink); color: var(--bg); }
+  .js-tabs section.tab-panel[hidden] { display: none; }
   .btn:hover { background: var(--accent); border-color: var(--accent); color: #1E2329; }
 
   section { padding: 64px 0; border-top: 1px solid var(--line); }
@@ -84,10 +85,10 @@
   <h1>Jorge Rodrigues</h1>
   <p class="lede">I currently operate Zebra Technologies’ real-time player tracking system at live NFL games. I built this portfolio to solve real problems and keep learning new ways to turn data into decisions.</p>
   <div class="actions">
-    <a class="btn primary" href="#projects">Projects</a>
-    <a class="btn" href="#reports">Reports</a>
+    <a class="btn tab primary" href="#projects" data-tab="projects">Projects</a>
+    <a class="btn tab" href="#reports" data-tab="reports">Reports</a>
+    <a class="btn" href="mailto:dijorgis11@gmail.com">Email</a>
     <a class="btn" href="https://www.linkedin.com/in/jorge-rodrigues-893673305">LinkedIn</a>
-    <a class="btn" href="mailto:dijorgis11@gmail.com">Email me</a>
   </div>
 </header>
 
@@ -189,5 +190,27 @@
   </section>
 </main>
 
+<script>
+(function () {
+  var tabs = document.querySelectorAll('.btn.tab');
+  var panels = { projects: document.getElementById('projects'), reports: document.getElementById('reports') };
+  function show(name, scroll) {
+    if (!panels[name]) name = 'projects';
+    for (var k in panels) panels[k].hidden = (k !== name);
+    tabs.forEach(function (t) { t.classList.toggle('primary', t.dataset.tab === name); });
+    if (scroll) panels[name].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.documentElement.classList.add('js-tabs');
+  for (var k in panels) panels[k].classList.add('tab-panel');
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function (e) {
+      e.preventDefault();
+      show(t.dataset.tab, true);
+      history.replaceState(null, '', '#' + t.dataset.tab);
+    });
+  });
+  show(location.hash.replace('#', ''), location.hash === '#reports');
+})();
+</script>
 </body>
 </html>
