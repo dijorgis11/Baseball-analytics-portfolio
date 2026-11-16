@@ -35,6 +35,7 @@
   .btn { display: inline-block; padding: 11px 20px; border: 2px solid var(--ink); border-radius: 8px; font-weight: 600; text-decoration: none; }
   .btn.primary { background: var(--ink); color: var(--bg); }
   .js-tabs section.tab-panel[hidden] { display: none; }
+  .email-addr { font-size: 1.6rem; font-weight: 700; margin: 0 0 6px; word-break: break-all; }
   .btn:hover { background: var(--accent); border-color: var(--accent); color: #1E2329; }
 
   section { padding: 64px 0; border-top: 1px solid var(--line); }
@@ -87,7 +88,7 @@
   <div class="actions">
     <a class="btn tab primary" href="#projects" data-tab="projects">Projects</a>
     <a class="btn tab" href="#reports" data-tab="reports">Reports</a>
-    <a class="btn" href="mailto:dijorgis11@gmail.com">Email</a>
+    <a class="btn tab" href="#contact" data-tab="contact">Email</a>
     <a class="btn" href="https://www.linkedin.com/in/jorge-rodrigues-893673305">LinkedIn</a>
   </div>
 </header>
@@ -172,6 +173,21 @@
     </div>
   </section>
 
+  <section id="contact">
+    <div class="wrap">
+      <h2>Email</h2>
+      <p class="intro">The best way to reach me.</p>
+      <article class="card contact-card">
+        <p class="email-addr">dijorgis11@gmail.com</p>
+        <div class="links">
+          <a href="#" id="copy-email">Copy email</a>
+          <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=dijorgis11@gmail.com" target="_blank" rel="noopener">Write in Gmail</a>
+          <a href="mailto:dijorgis11@gmail.com">Open my mail app</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <section id="about">
     <div class="wrap about">
       <div>
@@ -193,7 +209,7 @@
 <script>
 (function () {
   var tabs = document.querySelectorAll('.btn.tab');
-  var panels = { projects: document.getElementById('projects'), reports: document.getElementById('reports') };
+  var panels = { projects: document.getElementById('projects'), reports: document.getElementById('reports'), contact: document.getElementById('contact') };
   function show(name, scroll) {
     if (!panels[name]) name = 'projects';
     for (var k in panels) panels[k].hidden = (k !== name);
@@ -209,7 +225,18 @@
       history.replaceState(null, '', '#' + t.dataset.tab);
     });
   });
-  show(location.hash.replace('#', ''), location.hash === '#reports');
+  show(location.hash.replace('#', ''), location.hash === '#reports' || location.hash === '#contact');
+  var cp = document.getElementById('copy-email');
+  cp.addEventListener('click', function (e) {
+    e.preventDefault();
+    var done = function () { cp.textContent = 'Copied'; setTimeout(function () { cp.textContent = 'Copy email'; }, 2000); };
+    var fallback = function () {
+      var r = document.createRange(); r.selectNodeContents(document.querySelector('.email-addr'));
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      cp.textContent = 'Press Ctrl+C to copy';
+    };
+    try { navigator.clipboard.writeText('dijorgis11@gmail.com').then(done, fallback); } catch (err) { fallback(); }
+  });
 })();
 </script>
 </body>
